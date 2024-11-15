@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $_SESSION['message'] = "Vous n'êtes pas autorisé à vous connecter.";
     }
-    
+
     header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
@@ -43,19 +43,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page de connexion</title>
 </head>
-<div class="container">
-    <h2>Authentification</h2>
 
-    <?php if (!empty($message)) {
-        echo "<p>$message</p>";
-    } ?>
+<body>
+    <div class="container">
+        <h2>Authentification</h2>
 
-    <form method="POST" action="">
-        <label for="username">Nom d'utilisateur:</label>
-        <input type="text" id="username" name="username" required><br>
+        <?php if (!empty($message)) {
+            echo "<p>$message</p>";
+        } ?>
 
-        <button type="submit">Se connecter</button>
-    </form>
-</div>
+        <form method="POST" action="">
+            <label for="username">Nom d'utilisateur:</label>
+            <input type="text" id="username" name="username" required><br>
+
+            <button type="submit">Se connecter</button>
+        </form>
+    </div>
+</body>
 
 </html>
