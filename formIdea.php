@@ -39,6 +39,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             'description' => $description,
             'author' => $author,
             'createdAt' => $createdAt->format('Y-m-d H:i:s'),
+            'likes' => 0,
+            'dislikes' => 0,
         ];
 
         // On les transfère dans ce tableau
@@ -92,8 +94,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <label for="description">Description</label>
         <input style="height: 20vh" type="text" name="description" value="<?= (!empty($erreurs)) ? htmlspecialchars($description) : "" ?>">
-
-        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
 
         <input type="submit" value="Soumettre">
     </form>
