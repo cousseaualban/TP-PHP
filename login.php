@@ -1,5 +1,7 @@
 <?php
 session_start();
+$csrfToken = bin2hex(random_bytes(32));
+$_SESSION['csrf_token'] = $csrfToken;
 
 if (isset($_SESSION['message'])) {
     $message = $_SESSION['message'];

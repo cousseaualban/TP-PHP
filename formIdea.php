@@ -1,6 +1,10 @@
 <?php
 session_start();
 
+if (!isset($_SESSION['csrf_token'])) {
+    exit("Accès refusé : veuillez-vous connecter normalement ! Tu ne m'auras pas :)");
+}
+
 $title = $description = "";
 
 $erreurs = [];
@@ -16,10 +20,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!$description || trim($description) == "") {
         $erreurs[] = "La description est obligatoire";
     }
-
-    // if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-    //     exit("CSRF token invalide");
-    // }
 
     if (empty($erreurs)) {
         $author = filter_input(INPUT_GET, 'author', FILTER_SANITIZE_SPECIAL_CHARS);
@@ -86,6 +86,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <label for="description">Description</label>
         <input type="text" name="description" value="<?= (!empty($erreurs)) ? htmlspecialchars($description) : "" ?>">
+
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
 
         <input type="submit" value="Soumettre">
     </form>

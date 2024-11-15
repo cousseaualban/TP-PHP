@@ -9,34 +9,38 @@ if (file_exists($fileIdea)) {
     $ideasFichiers = json_decode($fileContent, true);
 }
 
-$response = filter_input(INPUT_POST, "response", FILTER_SANITIZE_SPECIAL_CHARS);
-$id_idea = filter_input(INPUT_POST, "id_idea", FILTER_SANITIZE_SPECIAL_CHARS);
-
-$fileVote = 'vote.json';
-$responseIdea = [];
-
-if (file_exists($fileVote)) {
-    $fileVoteContent = file_get_contents($fileVote);
-    $responseIdea = json_decode($fileVoteContent, true);
-}
-
-if (!empty($responseIdea)){
-    foreach($responseIdea as $index => $oneResponseIdea){
-        if($id_idea === $oneResponseIdea['id_idea']){
-            unset($responseIdea[$index]);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $response = filter_input(INPUT_POST, "response", FILTER_SANITIZE_SPECIAL_CHARS);
+    $id_idea = filter_input(INPUT_POST, "id_idea", FILTER_SANITIZE_SPECIAL_CHARS);
+    
+    $fileVote = 'vote.json';
+    $responseIdea = [];
+    
+    if (file_exists($fileVote)) {
+        $fileVoteContent = file_get_contents($fileVote);
+        $responseIdea = json_decode($fileVoteContent, true);
+    }
+    
+    if (!empty($responseIdea)){
+        foreach($responseIdea as $index => $oneResponseIdea){
+            if($id_idea === $oneResponseIdea['id_idea']){
+                unset($responseIdea[$index]);
+            }
         }
     }
+    
+    $votes = [
+        'id' => bin2hex(string: random_bytes(8)),
+        'response' => $response,
+        'author' => $_SESSION['username'],
+        'id_idea' => $id_idea
+    ];
+    
+    $responseIdea[] = $votes;
+    file_put_contents($fileVote, json_encode($responseIdea));
 }
 
-$votes = [
-    'id' => bin2hex(string: random_bytes(8)),
-    'response' => $response,
-    'author' => $_SESSION['username'],
-    'id_idea' => $id_idea
-];
 
-$responseIdea[] = $votes;
-file_put_contents($fileVote, json_encode($responseIdea));
 ?>
 
 <!DOCTYPE html>
