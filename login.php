@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['username'] = $username;
 
         // Redirige vers la page de soumission d'idée
-        header("Location: formidea.php");
+        header("Location: formIdea.php?author=$username");
         exit;
     } else {
         $_SESSION['message'] = "Vous n'êtes pas autorisé à vous connecter.";
