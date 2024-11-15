@@ -10,10 +10,12 @@ $title = $description = "";
 $erreurs = [];
 $idea = [];
 
+// On vérifie que la requête est de type POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = filter_input(INPUT_POST, "title", FILTER_SANITIZE_SPECIAL_CHARS);
     $description = filter_input(INPUT_POST, "description", FILTER_SANITIZE_SPECIAL_CHARS);
 
+    // On vérifie si le champ titre et description sont saisis
     if (!$title || trim($title) == "") {
         $erreurs[] = "Le titre est obligatoire";
     }
@@ -21,6 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $erreurs[] = "La description est obligatoire";
     }
 
+    // Si pas d'erreurs, on traite les données
     if (empty($erreurs)) {
         $author = filter_input(INPUT_GET, 'author', FILTER_SANITIZE_SPECIAL_CHARS);
         $createdAt = new \DateTimeImmutable();
@@ -29,6 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $fileContent = file_get_contents($file);
         $ideasFichiers = json_decode($fileContent, true);
 
+        // On créé un tableau avec les données saisies
         $ideas = [
             'id' => bin2hex(string: random_bytes(8)),
             'title' => $title,
@@ -37,6 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             'createdAt' => $createdAt->format('Y-m-d H:i:s'),
         ];
 
+        // On les transfère dans ce tableau
         $ideasFichiers[] = $ideas;
 
         file_put_contents($file, json_encode($ideasFichiers));
@@ -50,6 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./formIdea.css" type="text/css">
     <title>Soumission d'idée</title>
 </head>
 
@@ -85,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="text" name="title" value="<?= (!empty($erreurs)) ? htmlspecialchars($title) : "" ?>">
 
         <label for="description">Description</label>
-        <input type="text" name="description" value="<?= (!empty($erreurs)) ? htmlspecialchars($description) : "" ?>">
+        <input style="height: 20vh" type="text" name="description" value="<?= (!empty($erreurs)) ? htmlspecialchars($description) : "" ?>">
 
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
 
