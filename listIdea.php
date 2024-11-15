@@ -87,27 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liste d'idées</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-
-        th {
-            background-color: #f4f4f4;
-            text-align: left;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-    </style>
+    <link rel="stylesheet" href="./listIdea.css" type="text/css">
 </head>
 
 <body>
@@ -155,7 +135,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <p><?= htmlspecialchars($idea['dislikes']) ?></p>
                             </td>
                             <input type="hidden" name="id_idea" value="<?= htmlspecialchars($idea['id']) ?>">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                         </form>
                     </tr>
                 <?php endforeach; ?>
@@ -166,7 +145,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php endif; ?>
         </tbody>
     </table>
-    <a href="formIdea">Ajouter une idée</a>
+    <a href="formIdea.php">Ajouter une idée</a>
 </body>
 
 </html>
