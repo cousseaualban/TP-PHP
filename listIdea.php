@@ -14,6 +14,9 @@
             <li>
                 <a href="formIdea.php">Formulaire de soumission</a>
             </li>
+            <li>
+                <a href="logout.php">Se déconnecter</a>
+            </li>
         </ul>
     </nav>
 </body>
