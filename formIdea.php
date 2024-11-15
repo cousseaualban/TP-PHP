@@ -35,6 +35,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             'description' => $description,
             'author' => $author,
             'createdAt' => $createdAt->format('Y-m-d H:i:s'),
+            'likes' => 0,
+            'dislikes' => 0,
         ];
 
         $ideasFichiers[] = $ideas;
