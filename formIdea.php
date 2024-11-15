@@ -20,8 +20,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     // }
 
     if (empty($erreurs)){
-        // $author = filter_input(INPUT_GET, 'author', FILTER_SANITIZE_SPECIAL_CHARS);
-        $author = 2;
+        $author = filter_input(INPUT_GET, 'author', FILTER_SANITIZE_SPECIAL_CHARS);
         $createdAt = new \DateTimeImmutable();
     
         $file = 'idea.json'; 
@@ -60,6 +59,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
             </li>
             <li>
                 <a href="formIdea.php">Formulaire de soumission</a>
+            </li>
+            <li>
+                <a href="logout.php">Se déconnecter</a>
             </li>
         </ul>
     </nav>
