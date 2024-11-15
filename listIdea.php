@@ -7,6 +7,14 @@ $ideasFichiers = [];
 if (file_exists($fileIdea)) {
     $fileContent = file_get_contents($fileIdea);
     $ideasFichiers = json_decode($fileContent, true);
+
+    // Vérifie si des idées existent
+    if (!empty($ideasFichiers)) {
+        // Tri des idées par date
+        usort($ideasFichiers, function ($a, $b) {
+            return strtotime($b['createdAt']) - strtotime($a['createdAt']);
+        });
+    }
 }
 
 $response = filter_input(INPUT_POST, "response", FILTER_SANITIZE_SPECIAL_CHARS);
@@ -20,9 +28,9 @@ if (file_exists($fileVote)) {
     $responseIdea = json_decode($fileVoteContent, true);
 }
 
-if (!empty($responseIdea)){
-    foreach($responseIdea as $index => $oneResponseIdea){
-        if($id_idea === $oneResponseIdea['id_idea']){
+if (!empty($responseIdea)) {
+    foreach ($responseIdea as $index => $oneResponseIdea) {
+        if ($id_idea === $oneResponseIdea['id_idea']) {
             unset($responseIdea[$index]);
         }
     }
@@ -46,69 +54,54 @@ file_put_contents($fileVote, json_encode($responseIdea));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liste d'idées</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-
-        th {
-            background-color: #f4f4f4;
-            text-align: left;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-    </style>
+    <link rel="stylesheet" href="./listIdea.css" type="text/css">
 </head>
 
 <body>
-    <h1>Liste des idées</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Titre</th>
-                <th>Description</th>
-                <th>Auteur</th>
-                <th>Date</th>
-                <th>Vote Positif</th>
-                <th>Vote Négatif</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if (!empty($ideasFichiers)): ?>
-                <?php foreach ($ideasFichiers as $idea): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($idea['title']) ?></td>
-                        <td><?= htmlspecialchars($idea['description']) ?></td>
-                        <td><?= htmlspecialchars($idea['author'] ?? 'Anonyme') ?></td>
-                        <td><?= htmlspecialchars($idea['createdAt']) ?></td>
-                        <form method="POST">
-                            <td>
-                                <button type="submit" name="response" value="J'aime cette idée">J'aime cette idée</button>
-                            </td>
-                            <td>
-                                <button type="submit" name="response" value="Je n'aime pas cette idée">Je n'aime pas cette idée</button>
-                            </td>
-                            <input type="hidden" name="id_idea" value="<?= htmlspecialchars($idea['id']) ?>">
-                        </form>
-                    </tr>
-                <?php endforeach; ?>
-            <?php else: ?>
+    <div class="container">
+        <div class="nav">
+            <a href="logout.php" class="disconnect">Se déconnecter</a>
+        </div>
+        <h1>Liste des idées</h1>
+        <table>
+            <thead>
                 <tr>
-                    <td colspan="6">Aucune idée n'a encore été soumise.</td>
+                    <th>Titre</th>
+                    <th>Description</th>
+                    <th>Auteur</th>
+                    <th>Date</th>
+                    <th>Vote Positif</th>
+                    <th>Vote Négatif</th>
                 </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
-    <a href="formIdea">Ajouter une idée</a>
+            </thead>
+            <tbody>
+                <?php if (!empty($ideasFichiers)): ?>
+                    <?php foreach ($ideasFichiers as $idea): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($idea['title']) ?></td>
+                            <td><?= htmlspecialchars($idea['description']) ?></td>
+                            <td><?= htmlspecialchars($idea['author'] ?? 'Anonyme') ?></td>
+                            <td><?= htmlspecialchars($idea['createdAt']) ?></td>
+                            <form method="POST">
+                                <td>
+                                    <button type="submit" name="response" value="J'aime cette idée">J'aime cette idée</button>
+                                </td>
+                                <td>
+                                    <button type="submit" name="response" value="Je n'aime pas cette idée">Je n'aime pas cette idée</button>
+                                </td>
+                                <input type="hidden" name="id_idea" value="<?= htmlspecialchars($idea['id']) ?>">
+                            </form>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="6">Aucune idée n'a encore été soumise.</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+        <a href="formIdea">Ajouter une idée</a>
+    </div>
 </body>
 
 </html>

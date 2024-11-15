@@ -7,8 +7,10 @@ if (isset($_SESSION['message'])) {
 } else {
     $message = "";
 }
+// Liste des nom d'utilisateurs autorisés à se connecter
 $usernames = ["admin", "Zakaria", "Alban", "SuperAdmin"];
 
+// On vérifie que la requête est de type POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Récupération du nom d'utilisateur saisi
     $username = trim($_POST['username']);
@@ -41,6 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./login.css" type="text/css">
     <title>Page de connexion</title>
 </head>
 
