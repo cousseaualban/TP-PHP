@@ -1,96 +1,101 @@
 <?php
-session_start();
+// Déclaration des variables du composant Head 
+// L'une pour target le fichier css correspondant
+// L'autre pour le titre de la page
+$pathCSS = "./css/listIdea.css";
+$title = "Liste d\'idées";
+
+// On inclut le composant head.php dans la page
+require_once './components/head.php';
+require_once './functions/functions.php';
+
+// On vérifie que le token créé lors de la connexion est bon
 if (!isset($_SESSION['csrf_token'])) {
+    // Si mauvais token, alors fin du script
     exit("Accès refusé : veuillez-vous connecter normalement ! Tu ne m'auras pas :)");
 }
-$fileIdea = 'idea.json';
+$fileIdea = './json/idea.json';
 $ideasFichiers = [];
 
+// On vérifie si le fichier idea.json existe
 if (file_exists($fileIdea)) {
+    // On récupère les données de ce fichier
     $fileContent = file_get_contents($fileIdea);
     $ideasFichiers = json_decode($fileContent, true);
 }
 
-$fileVote = 'vote.json';
+$fileVote = './json/vote.json';
 
+// On vérifie si le fichier vote.json existe
 if (file_exists($fileVote)) {
+    // On récupère les données de ce fichier
     $fileVoteContent = file_get_contents($fileVote);
     $responseIdea = json_decode($fileVoteContent, true);
 };
 
+// On vérifie que la requête est bien en POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // On récupère les données des inputs
     $response = filter_input(INPUT_POST, "response", FILTER_SANITIZE_SPECIAL_CHARS);
     $id_idea = filter_input(INPUT_POST, "id_idea", FILTER_SANITIZE_SPECIAL_CHARS);
 
-    // Vérification de l'ancien vote de l'utilisateur
-    $userVote = null; 
-    if(!empty($responseIdea)){
-        foreach ($responseIdea as $vote) {
-            if ($vote['id_idea'] === $id_idea && $vote['author'] === $_SESSION['username']) {
-                $userVote = $vote['response'];
-                break;
-            }
-        }
-    }
+    // On récupère l'ancien vote de l'utilisateur si existant
+    $userVote = getUserVoteForThisIdea($responseIdea , id_idea: $id_idea); 
 
-    // Mettre à jour les compteurs avant d'ajouter le nouveau vote
+    // On vérifie que le fichier idea.json n'est pas vide
     if (!empty($ideasFichiers)) {
+        // On parcourt toutes les idées pour target la bonne idée via son id
         foreach ($ideasFichiers as $index => $oneIdea) {
             if ($oneIdea["id"] === $id_idea) {
-                if ($response === "Aimer" && $userVote !== "Aimer") {    
+                // Si le vote est "Aimer" et que l'ancien vote est différent d'aimer
+                if ($response === "Aimer" && $userVote !== "Aimer") {  
+                    // On incrémente la valeur des likes
                     $ideasFichiers[$index]["likes"]++;
-                    if ($userVote === "Ne pas aimer") {
-                        $ideasFichiers[$index]["dislikes"] > 0 ? $ideasFichiers[$index]["dislikes"]-- : '';
-                    }
+                    // Si le nombre de dislikes est supérieur à 0, alors on le décrémente    
+                    $ideasFichiers[$index]["dislikes"] > 0 ? $ideasFichiers[$index]["dislikes"]-- : '';
+                
                 } elseif ($response === "Ne pas aimer" && $userVote !== "Ne pas aimer") {
+                    // On incrémente la valeur des dislikes
                     $ideasFichiers[$index]["dislikes"]++;
-                    if ($userVote === "Aimer") {
-                        $ideasFichiers[$index]["likes"] > 0 ? $ideasFichiers[$index]["likes"]-- : '';
-                    }
-                }
-                break; // Une fois l'idée trouvée, sortir de la boucle
-            }
-        }
+                    // Si le nombre de likes est supérieur à 0, alors on le décrémente   
+                    $ideasFichiers[$index]["likes"] > 0 ? $ideasFichiers[$index]["likes"]-- : '';
+                    
+                };
+                // On arrête la boucle foreach car un utilisateur ne peut like/dislike à l'infini une idée
+                break; 
+            };
+        };
 
-        // Sauvegarder les modifications dans le fichier idea.json
+        // On enregiste la liste mise à jour dans le fichier idea.json
         file_put_contents($fileIdea, json_encode($ideasFichiers, JSON_PRETTY_PRINT));
-    }
-
-    // Supprimer l'ancien vote de l'utilisateur dans responseIdea
-    if (!empty($responseIdea)){
-        foreach ($responseIdea as $index => $oneResponseIdea) {
-            if ($id_idea === $oneResponseIdea["id_idea"] && $oneResponseIdea["author"] === $_SESSION["username"]) {
-                unset($responseIdea[$index]);
-            }
-        }
     };
 
-    // Ajouter le nouveau vote
+    // On vérifie que le fichier vote.json n'est pas vide
+    if (!empty($responseIdea)){
+        // On parcourt les différents votes
+        foreach ($responseIdea as $index => $oneResponseIdea) {
+            // Si l'utilisateur avait déjà voté pour une idée
+            if ($id_idea === $oneResponseIdea["id_idea"] && $oneResponseIdea["author"] === $_SESSION["username"]) {
+                // Alors, on supprime son ancien vote
+                unset($responseIdea[$index]);
+            };
+        };
+    };
+
+    // Création d'un tableau contenant le nouveau vote
     $votes = [
         'id' => bin2hex(random_bytes(8)),
         'response' => $response,
         'author' => $_SESSION['username'],
         'id_idea' => $id_idea
     ];
+    // Ajout du nouveau vote 
     $responseIdea[] = $votes;
 
-    // Sauvegarder les votes dans le fichier vote.json
+    // On enregiste la liste mise à jour dans le fichier vote.json
     file_put_contents($fileVote, json_encode(array_values($responseIdea), JSON_PRETTY_PRINT));
 };
-
 ?>
-
-<!DOCTYPE html>
-<html lang="fr">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liste d'idées</title>
-    <link rel="stylesheet" href="./listIdea.css" type="text/css">
-</head>
-
-<body>
     <h1>Liste des idées</h1>
     <table>
         <thead>
@@ -107,16 +112,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php if (!empty($ideasFichiers)): ?>
                 <?php foreach ($ideasFichiers as $idea): ?>
                     <?php
-                    // Vérifier si l'utilisateur a déjà voté pour cette idée
-                    $userVote = null; 
-                    if (!empty($responseIdea)){
-                        foreach ($responseIdea as $vote) {
-                            if ($vote['id_idea'] === $idea['id'] && $vote['author'] === $_SESSION['username']) {
-                                $userVote = $vote['response']; // "Aimer" ou "Ne pas aimer"
-                                break;
-                            }
-                        }
-                    }
+                        // On récupère l'ancien vote de l'utilisateur si existant
+                        $userVote = getUserVoteForThisIdea($responseIdea , id_idea: $idea["id"]); 
                     ?>
                     <tr>
                         <td><?= htmlspecialchars($idea['title']) ?></td>
@@ -126,12 +123,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <form method="POST">
                             <td>
                                 <button type="submit" name="response" value="Aimer" <?= $userVote === "Aimer" ? 'disabled' : '' ?>>J'aime cette idée</button>
-                                <!-- <button type="submit" name="response" value="Aimer">J'aime cette idée</button> -->
                                 <p><?= htmlspecialchars($idea['likes']) ?></p>
                             </td>
                             <td>
                                 <button type="submit" name="response" value="Ne pas aimer" <?= $userVote === "Ne pas aimer" ? 'disabled' : '' ?>>Je n'aime pas cette idée</button>
-                                <!-- <button type="submit" name="response" value="Ne pas aimer">Je n'aime pas cette idée</button> -->
                                 <p><?= htmlspecialchars($idea['dislikes']) ?></p>
                             </td>
                             <input type="hidden" name="id_idea" value="<?= htmlspecialchars($idea['id']) ?>">
@@ -145,7 +140,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php endif; ?>
         </tbody>
     </table>
-    <a href="formIdea.php">Ajouter une idée</a>
-</body>
-
-</html>
+<?php require_once './components/footer.php';?>
