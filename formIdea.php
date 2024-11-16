@@ -1,7 +1,16 @@
 <?php
-session_start();
+// Déclaration des variables du composant Head 
+// L'une pour target le fichier css correspondant
+// L'autre pour le titre de la page
+$pathCSS = "./css/formIdea.css";
+$title = "Soumission d\'idées";
 
+// On inclut le composant head.php dans la page
+require_once './components/head.php';
+
+// On vérifie que le token créé lors de la connexion est bon
 if (!isset($_SESSION['csrf_token'])) {
+    // Si mauvais token, alors fin du script
     exit("Accès refusé : veuillez-vous connecter normalement ! Tu ne m'auras pas :)");
 }
 
@@ -12,10 +21,11 @@ $idea = [];
 
 // On vérifie que la requête est de type POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Récupération des données des inputs 
     $title = filter_input(INPUT_POST, "title", FILTER_SANITIZE_SPECIAL_CHARS);
     $description = filter_input(INPUT_POST, "description", FILTER_SANITIZE_SPECIAL_CHARS);
 
-    // On vérifie si le champ titre et description sont saisis
+    // On vérifie si le champ titre et description sont saisis / qu'il n'y ait pas que des caractères d'espacements
     if (!$title || trim($title) == "") {
         $erreurs[] = "Le titre est obligatoire";
     }
@@ -28,7 +38,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $author = filter_input(INPUT_GET, 'author', FILTER_SANITIZE_SPECIAL_CHARS);
         $createdAt = new \DateTimeImmutable();
 
-        $file = 'idea.json';
+        //On charge les données des idées depuis le fichier JSON
+        $file = './json/idea.json';
         $fileContent = file_get_contents($file);
         $ideasFichiers = json_decode($fileContent, true);
 
@@ -39,40 +50,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             'description' => $description,
             'author' => $author,
             'createdAt' => $createdAt->format('Y-m-d H:i:s'),
+            'likes' => 0,
+            'dislikes' => 0,
         ];
 
         // On les transfère dans ce tableau
         $ideasFichiers[] = $ideas;
 
+        // On enregiste la liste mise à jour dans le fichier JSON
         file_put_contents($file, json_encode($ideasFichiers));
         $successMessage = "Soumission effectuée";
     }
 }
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./formIdea.css" type="text/css">
-    <title>Soumission d'idée</title>
-</head>
-
-<body>
-    <nav>
-        <ul>
-            <li>
-                <a href="listIdea.php?author=<?= $_SESSION['username']?>">Liste d'idées</a>
-            </li>
-            <li>
-                <a href="formIdea.php">Formulaire de soumission</a>
-            </li>
-            <li>
-                <a href="logout.php">Se déconnecter</a>
-            </li>
-        </ul>
-    </nav>
     <?php if (!empty($erreurs)): ?>
         <div class="erreurs">
             <ul>
@@ -93,10 +83,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label for="description">Description</label>
         <input style="height: 20vh" type="text" name="description" value="<?= (!empty($erreurs)) ? htmlspecialchars($description) : "" ?>">
 
-        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
-
         <input type="submit" value="Soumettre">
     </form>
-</body>
-
-</html>
+<?php require_once './components/footer.php';?>

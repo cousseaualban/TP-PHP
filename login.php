@@ -1,5 +1,14 @@
 <?php
-session_start();
+// Déclaration des variables du composant Head 
+// L'une pour target le fichier css correspondant
+// L'autre pour le titre de la page
+$pathCSS = "./css/login.css";
+$title = "Page de connexion";
+
+// On inclut le composant head.php dans la page
+require_once './components/head.php';
+
+// Création d'un token 
 $csrfToken = bin2hex(random_bytes(32));
 $_SESSION['csrf_token'] = $csrfToken;
 
@@ -38,18 +47,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 ?>
-
-<!DOCTYPE html>
-<html lang="fr">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./login.css" type="text/css">
-    <title>Page de connexion</title>
-</head>
-
-<body>
     <div class="container">
         <h2>Authentification</h2>
 
@@ -64,6 +61,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="submit">Se connecter</button>
         </form>
     </div>
-</body>
-
-</html>
+<?php require_once './components/footer.php';?>
